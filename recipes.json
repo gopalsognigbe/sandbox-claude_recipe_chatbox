@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "name": "Pâtes Carbonara",
+    "ingredients": ["pâtes", "œufs", "bacon", "parmesan"],
+    "time": 20,
+    "difficulty": "facile"
+  },
+  {
+    "id": 2,
+    "name": "Ratatouille",
+    "ingredients": ["aubergine", "tomate", "oignon", "poivron"],
+    "time": 45,
+    "difficulty": "moyen"
+  },
+  {
+    "id": 3,
+    "name": "Soupe à l'oignon",
+    "ingredients": ["oignon", "bouillon", "pain", "fromage"],
+    "time": 30,
+    "difficulty": "facile"
+  }
+]
