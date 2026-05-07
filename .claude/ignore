@@ -1,0 +1,19 @@
+# Dépendances
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Logs et cache
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Secrets (JAMAIS exposer ça)
+.env
+.env.local
+*.key
