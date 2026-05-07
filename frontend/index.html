@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>La Table Maison</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:   #fdf6ee;
+      --brown:   #5c3d2e;
+      --orange:  #e07b39;
+      --orange2: #c96429;
+      --card-bg: #ffffff;
+      --text:    #2d1f14;
+      --muted:   #8a7060;
+      --border:  #e8ddd4;
+      --shadow:  0 4px 24px rgba(92,61,46,.10);
+      --radius:  16px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ───────────────────────────────────────────────── */
+    header {
+      background: var(--brown);
+      color: #fff;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,.18);
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo span { font-size: 1.6rem; }
+
+    nav a {
+      color: rgba(255,255,255,.75);
+      text-decoration: none;
+      margin-left: 28px;
+      font-size: .95rem;
+      transition: color .2s;
+    }
+    nav a:hover { color: #fff; }
+
+    /* ── Hero ─────────────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 72px 24px 52px;
+      background: linear-gradient(135deg, #fdf6ee 0%, #f5e6d3 100%);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--brown);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 14px;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 480px;
+      margin: 0 auto 32px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--orange);
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: .95rem;
+    }
+
+    /* ── Section ──────────────────────────────────────────────── */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 56px 24px;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--brown);
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+    }
+
+    /* ── Recipe grid ──────────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 28px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: transform .25s, box-shadow .25s;
+      cursor: default;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 36px rgba(92,61,46,.16);
+    }
+
+    .card-img {
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      background: linear-gradient(135deg, #faebd7, #f5d5b5);
+    }
+
+    .card-body { padding: 22px 24px 24px; }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--brown);
+      margin-bottom: 10px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .tag {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: .8rem;
+      font-weight: 500;
+    }
+
+    .tag.orange {
+      background: #fff3e8;
+      border-color: #f5c89a;
+      color: var(--orange2);
+    }
+
+    .ingredients {
+      font-size: .9rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .ingredients strong { color: var(--text); }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 24px;
+      border-top: 1px solid var(--border);
+      background: #faf6f2;
+    }
+
+    .meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .85rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ── Floating chat button ─────────────────────────────────── */
+    #chat-btn {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: var(--orange);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(224,123,57,.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      transition: background .2s, transform .2s, box-shadow .2s;
+      z-index: 200;
+    }
+
+    #chat-btn:hover {
+      background: var(--orange2);
+      transform: scale(1.07);
+      box-shadow: 0 8px 30px rgba(224,123,57,.55);
+    }
+
+    #chat-btn .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 18px;
+      height: 18px;
+      background: #e74c3c;
+      border-radius: 50%;
+      border: 2px solid var(--cream);
+      display: none;
+    }
+
+    /* ── Chat panel ───────────────────────────────────────────── */
+    #chat-panel {
+      position: fixed;
+      bottom: 108px;
+      right: 32px;
+      width: 380px;
+      max-width: calc(100vw - 48px);
+      height: 520px;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 12px 48px rgba(92,61,46,.22);
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 200;
+      overflow: hidden;
+      transform: scale(.9) translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1), opacity .2s;
+    }
+
+    #chat-panel.open {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .chat-header {
+      background: var(--brown);
+      color: #fff;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .chat-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .chat-header-info { flex: 1; }
+
+    .chat-header-info strong {
+      display: block;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .chat-header-info span {
+      font-size: .78rem;
+      color: rgba(255,255,255,.65);
+    }
+
+    .chat-close {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,.7);
+      font-size: 1.3rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+      transition: color .15s;
+    }
+    .chat-close:hover { color: #fff; }
+
+    /* ── Messages ─────────────────────────────────────────────── */
+    #chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .msg {
+      max-width: 82%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: .92rem;
+      line-height: 1.5;
+      word-break: break-word;
+      animation: fadeUp .2s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg.bot {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-bottom-left-radius: 4px;
+      align-self: flex-start;
+    }
+
+    .msg.user {
+      background: var(--orange);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+      align-self: flex-end;
+    }
+
+    .typing {
+      display: flex;
+      gap: 5px;
+      padding: 12px 16px;
+      align-self: flex-start;
+    }
+
+    .typing span {
+      width: 8px;
+      height: 8px;
+      background: var(--muted);
+      border-radius: 50%;
+      animation: bounce .9s infinite;
+    }
+
+    .typing span:nth-child(2) { animation-delay: .15s; }
+    .typing span:nth-child(3) { animation-delay: .3s; }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30%           { transform: translateY(-6px); }
+    }
+
+    /* ── Input bar ────────────────────────────────────────────── */
+    .chat-input-bar {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+      background: #fff;
+    }
+
+    #chat-input {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 50px;
+      padding: 10px 18px;
+      font-size: .9rem;
+      outline: none;
+      color: var(--text);
+      background: var(--cream);
+      transition: border-color .2s;
+    }
+
+    #chat-input:focus { border-color: var(--orange); background: #fff; }
+
+    #chat-send {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--orange);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background .2s, transform .15s;
+    }
+
+    #chat-send:hover { background: var(--orange2); transform: scale(1.05); }
+    #chat-send:active { transform: scale(.95); }
+
+    #chat-send svg { width: 18px; height: 18px; fill: #fff; }
+
+    /* ── Suggestions ──────────────────────────────────────────── */
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 16px 12px;
+    }
+
+    .suggestion {
+      background: #fff3e8;
+      border: 1px solid #f5c89a;
+      color: var(--orange2);
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: .8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .suggestion:hover { background: #ffe8cc; }
+
+    /* ── Footer ───────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: var(--muted);
+      font-size: .85rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────── -->
+<header>
+  <div class="logo"><span>🍽️</span> La Table Maison</div>
+  <nav>
+    <a href="#">Recettes</a>
+    <a href="#">Catégories</a>
+    <a href="#">À propos</a>
+  </nav>
+</header>
+
+<!-- ── Hero ───────────────────────────────────────────────────── -->
+<section class="hero">
+  <h1>Des recettes faites<br>avec amour 🫶</h1>
+  <p>Découvrez nos plats du terroir, simples et savoureux. Posez vos questions au chef IA !</p>
+  <div class="hero-badge">✨ 3 recettes disponibles</div>
+</section>
+
+<!-- ── Recipes ─────────────────────────────────────────────────── -->
+<main class="section">
+  <h2 class="section-title">🥘 Nos recettes</h2>
+  <div class="grid" id="recipe-grid"></div>
+</main>
+
+<footer>© 2026 La Table Maison — Propulsé par LangChain &amp; LangGraph</footer>
+
+<!-- ── Floating chat button ───────────────────────────────────── -->
+<button id="chat-btn" title="Parler au chef IA">
+  💬
+  <div class="badge" id="chat-badge"></div>
+</button>
+
+<!-- ── Chat panel ─────────────────────────────────────────────── -->
+<div id="chat-panel" role="dialog" aria-label="Assistant culinaire">
+  <div class="chat-header">
+    <div class="chat-avatar">👨‍🍳</div>
+    <div class="chat-header-info">
+      <strong>Chef IA</strong>
+      <span>Assistant culinaire · en ligne</span>
+    </div>
+    <button class="chat-close" id="chat-close" aria-label="Fermer">✕</button>
+  </div>
+
+  <div id="chat-messages">
+    <div class="msg bot">
+      Bonjour ! Je suis votre assistant culinaire 🍳<br>
+      Posez-moi n'importe quelle question sur nos recettes !
+    </div>
+  </div>
+
+  <div class="suggestions" id="suggestions">
+    <button class="suggestion">Ingrédients carbonara ?</button>
+    <button class="suggestion">Recette la plus rapide ?</button>
+    <button class="suggestion">Recette avec oignons ?</button>
+  </div>
+
+  <div class="chat-input-bar">
+    <input id="chat-input" type="text" placeholder="Posez une question…" autocomplete="off" />
+    <button id="chat-send" aria-label="Envoyer">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  /* ── Recipes data ────────────────────────────────────────────── */
+  const recipes = [
+    {
+      name: "Pâtes Carbonara",
+      emoji: "🍝",
+      ingredients: ["pâtes", "œufs", "bacon", "parmesan"],
+      time: 20,
+      difficulty: "Facile",
+      description: "Un grand classique de la cuisine italienne, crémeux et savoureux, prêt en un clin d'œil."
+    },
+    {
+      name: "Ratatouille",
+      emoji: "🥗",
+      ingredients: ["aubergine", "tomate", "oignon", "poivron"],
+      time: 45,
+      difficulty: "Moyen",
+      description: "Un plat provençal coloré et végétarien, mijoté doucement avec des légumes du soleil."
+    },
+    {
+      name: "Soupe à l'oignon",
+      emoji: "🧅",
+      ingredients: ["oignon", "bouillon", "pain", "fromage"],
+      time: 30,
+      difficulty: "Facile",
+      description: "La soupe réconfortante par excellence, gratinée au four avec du fromage fondu."
+    }
+  ];
+
+  /* ── Render cards ─────────────────────────────────────────────── */
+  const grid = document.getElementById('recipe-grid');
+
+  recipes.forEach(r => {
+    const diffColor = r.difficulty === 'Facile' ? 'orange' : '';
+    grid.innerHTML += `
+      <article class="card">
+        <div class="card-img">${r.emoji}</div>
+        <div class="card-body">
+          <h3 class="card-title">${r.name}</h3>
+          <div class="tags">
+            <span class="tag">⏱ ${r.time} min</span>
+            <span class="tag ${diffColor}">${r.difficulty}</span>
+          </div>
+          <p class="ingredients"><strong>Ingrédients :</strong> ${r.ingredients.join(', ')}</p>
+          <p style="margin-top:10px;font-size:.88rem;color:var(--muted)">${r.description}</p>
+        </div>
+        <div class="card-footer">
+          <span class="meta">🥄 ${r.ingredients.length} ingrédients</span>
+          <span class="meta">⭐ Populaire</span>
+        </div>
+      </article>`;
+  });
+
+  /* ── Chat toggle ─────────────────────────────────────────────── */
+  const btn   = document.getElementById('chat-btn');
+  const panel = document.getElementById('chat-panel');
+  const close = document.getElementById('chat-close');
+
+  btn.addEventListener('click', () => {
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) {
+      document.getElementById('chat-input').focus();
+      document.getElementById('chat-badge').style.display = 'none';
+    }
+  });
+
+  close.addEventListener('click', () => panel.classList.remove('open'));
+
+  /* ── Suggestions ─────────────────────────────────────────────── */
+  document.querySelectorAll('.suggestion').forEach(s => {
+    s.addEventListener('click', () => {
+      document.getElementById('chat-input').value = s.textContent;
+      sendMessage();
+    });
+  });
+
+  /* ── Messaging ───────────────────────────────────────────────── */
+  const messagesEl = document.getElementById('chat-messages');
+  const inputEl    = document.getElementById('chat-input');
+  const sendBtn    = document.getElementById('chat-send');
+
+  function addMessage(text, role) {
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function showTyping() {
+    const t = document.createElement('div');
+    t.className = 'msg bot typing';
+    t.id = 'typing-indicator';
+    t.innerHTML = '<span></span><span></span><span></span>';
+    messagesEl.appendChild(t);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return t;
+  }
+
+  async function sendMessage() {
+    const query = inputEl.value.trim();
+    if (!query) return;
+
+    // Hide suggestions after first message
+    document.getElementById('suggestions').style.display = 'none';
+
+    inputEl.value = '';
+    addMessage(query, 'user');
+    const typing = showTyping();
+
+    try {
+      const res = await fetch('http://localhost:8001/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+      });
+
+      typing.remove();
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      addMessage(data.response, 'bot');
+    } catch (err) {
+      typing.remove();
+      addMessage(
+        "⚠️ Impossible de joindre le serveur. Lancez d'abord : python api.py",
+        'bot'
+      );
+    }
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+</script>
+
+</body>
+</html>
