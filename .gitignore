@@ -6,3 +6,4 @@ __pycache__/
 .claude/mcp/config.json
 .claude/mcp/config.json
 .mcp.json
+.claude/hooks.json
