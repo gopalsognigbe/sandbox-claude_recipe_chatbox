@@ -5,3 +5,4 @@ __pycache__/
 .DS_Store
 .claude/mcp/config.json
 .claude/mcp/config.json
+.mcp.json
