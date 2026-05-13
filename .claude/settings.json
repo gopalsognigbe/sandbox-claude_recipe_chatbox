@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "black $CLAUDE_TOOL_INPUT_PATH 2>/dev/null || true"
+            "command": "FILE=$(cat | jq -r '.tool_input.file_path // empty'); [ -n \"$FILE\" ] && black \"$FILE\" 2>/dev/null || true"
           }
         ]
       }
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [[ '$CLAUDE_TOOL_INPUT_PATH' == *'.env'* ]]; then echo 'ERREUR: Modification de .env bloquée' && exit 1; fi"
+            "command": "FILE=$(cat | jq -r '.tool_input.file_path // empty'); if [[ \"$FILE\" == *\".env\"* ]]; then echo 'ERREUR: Modification de .env bloquée' >&2; exit 2; fi"
           }
         ]
       }
