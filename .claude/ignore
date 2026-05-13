@@ -17,3 +17,4 @@ logs/
 .env
 .env.local
 *.key
+.claude/mcp/config.json
