@@ -21,3 +21,6 @@
 - `python chatbot.py` : lancer le chatbot en mode CLI
 - `python api.py` : démarrer l'API
 - `python -m pytest tests/` : lancer les tests
+## MCP Servers (extensions externes)
+- Configuration dans `.claude/mcp/config.json`
+- Serveurs disponibles : à définir
