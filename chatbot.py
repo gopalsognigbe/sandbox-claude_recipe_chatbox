@@ -1,5 +1,6 @@
 import json
 import os
+import threading
 from collections import OrderedDict
 from typing import Any, Optional, TypedDict, List, Dict
 
@@ -14,29 +15,42 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 
 class ResponseCache:
-    """Cache LRU simple : conserve les 10 dernières paires question/réponse."""
+    """Cache LRU simple : conserve les 10 dernières paires question/réponse.
+
+    Thread-safe via threading.Lock — nécessaire car Flask gère les requêtes
+    en mode multi-thread par défaut et OrderedDict n'est pas atomique.
+
+    Note — cache stampede : deux requêtes identiques arrivant simultanément
+    avant que la première soit mise en cache appelleront toutes les deux le LLM.
+    Acceptable avec max_size=10 (faible concurrence attendue), mais à surveiller
+    si le trafic augmente (solution : per-key locking ou dogpile pattern).
+    """
 
     def __init__(self, max_size: int = 10):
         self._cache: OrderedDict[str, str] = OrderedDict()
         self.max_size = max_size
+        self._lock = threading.Lock()
 
     def get(self, query: str) -> Optional[str]:
         key = query.strip().lower()
-        if key in self._cache:
-            self._cache.move_to_end(key)   # LRU : marque comme récemment utilisé
-            return self._cache[key]
+        with self._lock:
+            if key in self._cache:
+                self._cache.move_to_end(key)   # LRU : marque comme récemment utilisé
+                return self._cache[key]
         return None
 
     def set(self, query: str, response: str) -> None:
         key = query.strip().lower()
-        if key in self._cache:
-            self._cache.move_to_end(key)
-        self._cache[key] = response
-        if len(self._cache) > self.max_size:
-            self._cache.popitem(last=False)  # retire le plus ancien
+        with self._lock:
+            if key in self._cache:
+                self._cache.move_to_end(key)
+            self._cache[key] = response
+            if len(self._cache) > self.max_size:
+                self._cache.popitem(last=False)  # retire le plus ancien
 
     def __len__(self) -> int:
-        return len(self._cache)
+        with self._lock:
+            return len(self._cache)
 
 
 # ---------------------------------------------------------------------------

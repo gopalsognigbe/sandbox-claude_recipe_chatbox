@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from chatbot import load_recipes, create_llm, create_rag_chain, create_graph
+from chatbot import load_recipes, create_llm, create_rag_chain, create_graph, ResponseCache
 
 app = Flask(__name__)
 CORS(app, origins="*")
@@ -9,7 +9,8 @@ CORS(app, origins="*")
 recipes = load_recipes("recipes.json")
 llm     = create_llm()
 chain   = create_rag_chain(llm)
-graph   = create_graph(recipes, chain)
+cache   = ResponseCache(max_size=10)
+graph   = create_graph(recipes, chain, cache)
 
 @app.route("/chat", methods=["POST"])
 def chat():
