@@ -1,11 +1,42 @@
 import json
 import os
+from collections import OrderedDict
 from typing import Any, Optional, TypedDict, List, Dict
 
 from dotenv import load_dotenv
 from langchain_core.language_models.llms import LLM
 
 load_dotenv()
+
+
+# ---------------------------------------------------------------------------
+# 0. Cache — mémorise les 10 dernières questions/réponses
+# ---------------------------------------------------------------------------
+
+class ResponseCache:
+    """Cache LRU simple : conserve les 10 dernières paires question/réponse."""
+
+    def __init__(self, max_size: int = 10):
+        self._cache: OrderedDict[str, str] = OrderedDict()
+        self.max_size = max_size
+
+    def get(self, query: str) -> Optional[str]:
+        key = query.strip().lower()
+        if key in self._cache:
+            self._cache.move_to_end(key)   # LRU : marque comme récemment utilisé
+            return self._cache[key]
+        return None
+
+    def set(self, query: str, response: str) -> None:
+        key = query.strip().lower()
+        if key in self._cache:
+            self._cache.move_to_end(key)
+        self._cache[key] = response
+        if len(self._cache) > self.max_size:
+            self._cache.popitem(last=False)  # retire le plus ancien
+
+    def __len__(self) -> int:
+        return len(self._cache)
 
 
 # ---------------------------------------------------------------------------
@@ -112,23 +143,32 @@ class ChatState(TypedDict):
     response: str
 
 
-def create_graph(recipes: List[Dict], chain):
+def create_graph(recipes: List[Dict], chain, cache: "ResponseCache"):
     """
     Construit et compile le graph LangGraph avec deux nœuds :
       retrieve  → cherche les recettes pertinentes
-      generate  → génère la réponse via la chaîne RAG
+      generate  → génère la réponse via la chaîne RAG (avec cache)
     """
     from langgraph.graph import StateGraph, END
 
     def retrieve(state: ChatState) -> ChatState:
+        # Court-circuit : si la réponse est déjà en cache, on saute retrieve
+        if cache.get(state["query"]) is not None:
+            return state
         found = search_recipes(recipes, state["query"])
         context = format_context(found)
         print(f"  [retrieve] {len(found)} recette(s) sélectionnée(s)")
         return {**state, "context": context}
 
     def generate(state: ChatState) -> ChatState:
+        cached = cache.get(state["query"])
+        if cached is not None:
+            print(f"  [cache] Réponse trouvée en cache ({len(cache)}/{cache.max_size})")
+            return {**state, "response": cached}
         response = chain.invoke({"context": state["context"], "question": state["query"]})
-        return {**state, "response": response.strip()}
+        response = response.strip()
+        cache.set(state["query"], response)
+        return {**state, "response": response}
 
     graph = StateGraph(ChatState)
     graph.add_node("retrieve", retrieve)
@@ -153,8 +193,9 @@ if __name__ == "__main__":
 
     llm = create_llm()
     chain = create_rag_chain(llm)
-    app = create_graph(recipes, chain)
-    print("[OK] Graph compilé : retrieve → generate\n")
+    cache = ResponseCache(max_size=10)
+    app = create_graph(recipes, chain, cache)
+    print("[OK] Graph compilé : retrieve → generate (cache activé)\n")
 
     questions = [
         "Quels ingrédients faut-il pour les pâtes carbonara ?",
