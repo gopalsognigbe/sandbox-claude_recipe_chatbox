@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "black $CLAUDE_TOOL_INPUT_PATH 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ '$CLAUDE_TOOL_INPUT_PATH' == *'.env'* ]]; then echo 'ERREUR: Modification de .env bloquée' && exit 1; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
